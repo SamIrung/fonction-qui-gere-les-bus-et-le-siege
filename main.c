@@ -1,146 +1,110 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
+//LA DESTINATION EST LA DATE DU VOYAGE
 
-//FAIRE LE PAIMENT
-
-// Définir le montant de la réservation et le nombre maximal de réservations
-#define MONTANT_RESERVATION 25000
-#define MAX_RESERVATIONS 5
-
-// Structure pour les informations de l'opérateur
 typedef struct
 {
-    char nom[20]; // Nom de l'opérateur
-    int nombre_reservations; // Nombre de réservations effectuées
-} Operateur;
-
-// Fonction pour gérer le dépôt
-void depot(Operateur *operateur, Operateur *operateurs, int taille)
+    int jour;
+    int mois;
+    int heure;
+    int annee;
+    char destination[50];
+} Voyage;
+//fonctiion pour ecrire dans le fichier
+void ecrireDansFichier(Voyage v)
 {
-    int nombre_nouvelles_reservations; // Variable pour stocker le nombre de nouvelles réservations
-    int montant; // Variable pour stocker le montant entré par l'utilisateur
-
-    while (1)   // Boucle pour s'assurer que le montant correct est entré
+    FILE *f = fopen("reservations.txt", "a");
+    if (f == NULL)
     {
-        printf("\nla reservation revient a 25000fc\n");
-        printf("Veuillez entrer le montant pour la reservation : ");
-        scanf("%d", &montant); // Lire le montant entré par l'utilisateur
-        FILE *fichier = fopen("reservations.txt", "a");  // Ouvre le fichier en mode ajout
-        // Vérifier si le montant est correct
-        if (montant != MONTANT_RESERVATION)
-        {
-            printf("Montant incorrect. Le montant doit etre de %d fc.\n", MONTANT_RESERVATION);
-        }
-        else
-        {
-            // Mettre à jour le nombre de réservations de l'opérateur
-            operateur->nombre_reservations += nombre_nouvelles_reservations;
-            printf("Paiement de %d fc effectue avec succes pour votre reservation.", montant);
-
-            fprintf(fichier, "cash de: %dfc\n", montant);
-
-
-            break; // Sortir de la boucle si le montant est correct
-        }
-        fclose(fichier);  // Ferme le fichier
+        printf("Erreur lors de l'ouverture du fichier.\n");
+        return;
     }
+    fprintf(f, "Destination: %s, ", v.destination);
+    fprintf(f, "Date: %d/%d/%d, ", v.jour, v.mois, v.annee);
+    fprintf(f, "Heure: %dh00', ", v.heure);
+    fclose(f);
 }
-
-
-// Fonction pour gérer la vérification
-void verification(Operateur *operateur)
-{
-    if (operateur->nombre_reservations > 0)
-    {
-        // Afficher le nombre de réservations pour l'opérateur
-        printf("Vous avez %d reservation(s) via %s.\n", operateur->nombre_reservations, operateur->nom);
-    }
-    else
-    {
-        // Afficher un message si aucune réservation n'a été trouvée
-        printf("Aucune reservation trouvee.\n");
-    }
-}
-
-//  fonction principale qui gere le paiement
+//fonction principale qui gere  la destinattion et la date
 int main()
 {
-    int choix; // Variable pour stocker le choix de l'utilisateur
-    int operateur_choix; // Variable pour stocker le choix de l'opérateur
-    char retour; // Variable pour stocker le choix de retour de l'utilisateur
-
-    // Initialiser les opérateurs
-    Operateur operateurs[4] =
-    {
-        {"Orangemoney", 0},
-        {"Afrimoney", 0},
-        {"Airtelmoney", 0},
-        {"Mpesa", 0}
-    };
+    Voyage v;
+    int choix;
     do
     {
-        printf("\nVeuillez choisir votre operateur:\n");
-        printf("1. Orangemoney\n"); // Option pour Orangemoney
-        printf("2. Afrimoney\n"); // Option pour Afrimoney
-        printf("3. Airtelmoney\n"); // Option pour Airtelmoney
-        printf("4. Mpesa\n"); // Option pour Mpesa
-        printf("5. Quitter\n");
-        printf("Entrez votre choix: ");
-        scanf("%d", &operateur_choix); // Lire le choix de l'utilisateur
 
-        if (operateur_choix == 5)
+        printf("\nChoisissez votre destination:\n1. Kasumbalesa\n2. Kipushi\n3. Likasi\n4. Kolwezi\n5. Quitter\n>> ");
+        scanf("%d", &choix);
+        switch(choix)
         {
+        case 1:
+            strcpy(v.destination, "Kasumbalesa");
+            break;
+        case 2:
+            strcpy(v.destination, "Kipushi");
+            break;
+        case 3:
+            strcpy(v.destination, "Likasi");
+            break;
+        case 4:
+            strcpy(v.destination, "Kolwezi");
+            break;
+        case 5:
             //Annuler();
+            //break;
             exit(0);
+        default:
+            printf("Choix invalide.\n");
+            continue;
         }
-        else if(operateur_choix == 1 || operateur_choix == 2 || operateur_choix == 3 || operateur_choix == 4)
+        if(choix == 1 || choix == 2 || choix == 3 || choix == 4 || choix == 5)
         {
             break;
         }
     }
     while(1);
 
-    if (operateur_choix >= 1 && operateur_choix <= 4)   // Vérifier si le choix est valide
+    printf("Entrez le jour du voyage: ");
+    scanf("%d", &(v.jour));
+    printf("Entrez le mois du voyage: ");
+    scanf("%d", &(v.mois));
+    do
     {
-        Operateur *operateur = &operateurs[operateur_choix - 1];
-
-        // Fonction pour afficher le menu principal
-        do
+        printf("Choisissez l'heure d'embarquement :\n1. 9h\n2. 12h\n3. 15h\n4. Quitter\n>> ");
+        scanf("%d", &choix);
+        switch(choix)
         {
-            printf("\n1. effectuer la reservaton\n"); // Option pour le dépôt
-            printf("2. Verification de la reservation\n"); // Option pour la vérification
-            printf("3. Quitter\n");
-            printf("Entrez votre choix: ");
-            scanf("%d", &choix); // Lire le choix de l'utilisateur
-
-            switch (choix)
-            {
-            case 1:
-                depot(operateur, operateurs, 4); // Appeler la fonction dépôt
-                break;
-            case 2:
-                verification(operateur); // Appeler la fonction vérification
-                break;
-            default:
-                printf("Choix invalide. Veuillez reessayer.\n");
-            }
-
-            if (choix == 3)
-            {
-                //Annuler();
-                exit(0);
-            }
-            else if(choix == 1 || choix == 2)
-            {
-                break;
-            }
+        case 1:
+            v.heure = 9;
+            break;
+        case 2:
+            v.heure = 12;
+            break;
+        case 3:
+            v.heure = 15;
+            break;
+        case 4:
+            //Annuler();
+           // break;
+           exit(0);
+        default:
+            printf("Choix invalide.\n");
+            return 0;
         }
-        while(1);
-    }
-    else
-    {
-        printf("Choix invalide. Veuillez reessayer.\n");
-    }
 
+        if(choix == 1 || choix == 2 || choix == 3 || choix == 4)
+        {
+            break;
+        }
+    }
+    while(1);
+
+    //Genere automatiique l'année actuelle
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+    v.annee = tm.tm_year + 1900;
+    //Appel a la foncion, pour ecrire dans le fichier
+    ecrireDansFichier(v);
     return 0;
 }
