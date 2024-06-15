@@ -1,150 +1,70 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#include <string.h>
+//INFORMATION SUR LE CLIENT
 
-//SIEGE QUE LE CLIENT VEUT RESERVER
-#define Nb_Bus 2
-#define Nb_Siege_par_bus 5
-#define Nb_SECTIONS 3
-
-// Structure pour représenter un siège dans un bus
-typedef struct
+struct Reservation
 {
-    int occuper;
-    int section;  // 0 = avant, 1 = milieu, 2 = arrière
-} Siege;
+    char nom[50];
+    char postnom[50];
+    char telephone[15];
+    int destination;
+    int numero;
+};
 
-// Structure pour représenter un bus
-typedef struct
+//fonction pour gener le code du client
+int genererNumeroReservation()
 {
-    char code[4];
-    Siege seats[Nb_Siege_par_bus];
-} Bus;
-
-// Fonction pour trouver un bus avec des sièges libres
-int bus_libre(Bus buses[])
-{
-    for (int i = 0; i < Nb_Bus; i++)
-    {
-        for (int j = 0; j < Nb_Siege_par_bus; j++)
-        {
-            if (!buses[i].seats[j].occuper)
-            {
-                return i;
-            }
-        }
-    }
-    return -1;
+    return 1000 + rand() % 9000;  // Génère un numéro aléatoire entre 1000 et 9999
 }
-
-// Fonction pour réserver un siège dans un bus
-int reserver_siege(Bus buses[], int bus_index, int section)
+//fonction pour enregiisre dans le fichier les infos du clientt
+void enregistrerReservation(struct Reservation res)
 {
-    for (int i = 0; i < Nb_Siege_par_bus; i++)
-    {
-        if (!buses[bus_index].seats[i].occuper && buses[bus_index].seats[i].section == section)
-        {
-            buses[bus_index].seats[i].occuper = 1;
-            return 1;
-        }
-    }
-    return 0;
-}
-
-// Fonction pour afficher les réservations
-void afficher_reservation(Bus buses[])
-{
-    printf("Reservations :\n");
-    for (int i = 0; i < Nb_Bus; i++)
-    {
-        for (int j = 0; j < Nb_Siege_par_bus; j++)
-        {
-            if (buses[i].seats[j].occuper)
-            {
-                printf("Vous etes dans le Bus %s, a la section %d\n", buses[i].code, buses[i].seats[j].section);
-            }
-        }
-    }
-}
-// Fonction pour écrire les réservations dans un fichier
-void ecrire_fichier(Bus buses[])
-{
-    FILE* fichier=NULL;
-    fichier = fopen("reservations.txt", "a");
+    FILE *fichier = fopen("reservations.txt", "a");  // Ouvre le fichier en mode ajout
     if (fichier == NULL)
     {
-        printf("Erreur lors de l'ouverture du fichier.\n");
+        printf("Erreur : Impossible d'ouvrir le fichier.\n");
         return;
     }
-    for (int i = 0; i < Nb_Bus; i++)
+    else if(fichier != NULL)
     {
-        for (int j = 0; j < Nb_Siege_par_bus; j++)
-        {
-            if (buses[i].seats[j].occuper)
-            {
-                fprintf(fichier, "Bus %s, section %d, ", buses[i].code, buses[i].seats[j].section);
-            }
-        }
+        fprintf(fichier, "\nNom: %s - %s, ", res.nom, res.postnom);
+        fprintf(fichier, "Téléphone: %s, ", res.telephone);
+        fprintf(fichier, "Code: %d, ", res.numero);
     }
-
-    fclose(fichier);
+    fclose(fichier);  // Ferme le fichier
+    printf("Voici Code de reservation: %d\n", res.numero);
 }
-//FONCTION PPRINCIPALE QUI GERE LES SIEGES ET LES BUS
+//la fonction princiale qui gere les information du client
 int main()
 {
-    Bus buses[Nb_Bus];
+    struct Reservation reservations[10];
+    int nbReservations = 0;
 
-    // Initialisation des bus avec des sièges libres
-    for (int i = 0; i < Nb_Bus; i++)
-    {
-        sprintf(buses[i].code, "%03d", i + 1);
-        for (int j = 0; j < Nb_Siege_par_bus; j++)
-        {
-            buses[i].seats[j].occuper = 0;
-            buses[i].seats[j].section = j % Nb_SECTIONS;
-        }
-    }
-    // gérer les réservations
-    int bus_index = bus_libre(buses);
-    if (bus_index == -1)
-    {
-        printf("Desole, tous les bus sont complets pour aujourd'hui.\n");
-    }
-    int section;
-    do
-    {
-        //Interraction avec l'utilisateur
+    srand(time(0));  // Initialisation du générateur de nombres aléatoires
 
-        printf("\nOu voulez-vous vous asseoir ?\n0. en avant\n1. au milieu\n2. en arriere\n3. Quitter\n>> ");
+    char nom[50];
+    char postnom[50];
+    char telephone[15];
+    int destination;
 
-        scanf("%d", &section);
-        if (section == 3)
-        {
+    printf("\nVeillez Entrer ces informations pour la reservation\n");
+    printf("--------------------------------------------------\n");
+    printf("votre prenom : ");
+    scanf("%s", nom);
+    printf("votre nom : ");
+    scanf("%s", postnom);
+    printf("votre numero de telephone : ");
+    scanf("%s", telephone);
 
-            //Annuler();
-            exit(0);
-        }
+    reservations[nbReservations].numero = genererNumeroReservation();
+    strcpy(reservations[nbReservations].nom, nom);
+    strcpy(reservations[nbReservations].postnom, postnom);
+    strcpy(reservations[nbReservations].telephone, telephone);
 
+    enregistrerReservation(reservations[nbReservations]);  // Enregistre la réservation dans le fichier
 
-        else if(section == 0 || section == 1 || section == 2)
-        {
-            break;
-        }
-    }
-    while(1);
-
-    if (reserver_siege(buses, bus_index, section))
-    {
-        printf("\nVous etes dans le bus %s.\n", buses[bus_index].code);
-        //appel a la fonction pour ecrire dans fichier
-        ecrire_fichier(buses);
-    }
-    else
-    {
-        printf("Desole, il n'y a plus de sieges libres a cette section. Veuillez essayer une autre section.\n");
-    }
-
-    //afficher_reservation(buses);
-
-
+    nbReservations++;
     return 0;
 }
